@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2>Image Details</h2>
+<img src="{{ url_for('uploaded_file', filename=image.filename) }}" alt="Image {{ image.id }}" class="detail-image">
+
+<p><strong>Uploaded on:</strong> {{ image.upload_date.strftime('%Y-%m-%d %H:%M:%S') }}</p>
+
+{% if tags %}
+<p><strong>Tags:</strong>
+    {% for tag in tags %}
+        <span class="tag">{{ tag.strip() }}</span>
+    {% endfor %}
+</p>
+{% else %}
+<p>No tags.</p>
+{% endif %}
+
+<a href="{{ url_for('index') }}">Back to Home</a>
+{% endblock %}

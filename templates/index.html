@@ -1,15 +1,18 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>موقع الرفع</title>
-</head>
-<body>
-    <h1>مرحباً بك في موقع رفع الصور</h1>
+{% extends "base.html" %}
 
-    <form action="/upload" method="POST" enctype="multipart/form-data">
-        <input type="file" name="file">
-        <button type="submit">رفع الصورة</button>
-    </form>
-</body>
-</html>
+{% block content %}
+<form method="get" action="{{ url_for('index') }}" class="search-form">
+    <input type="text" name="search" placeholder="Search tags..." value="{{ search or '' }}">
+    <button type="submit">Search</button>
+</form>
+
+<div class="image-grid">
+    {% for image in images %}
+        <a href="{{ url_for('image_detail', image_id=image.id) }}">
+            <img src="{{ url_for('uploaded_file', filename=image.filename) }}" alt="Image {{ image.id }}">
+        </a>
+    {% else %}
+        <p>No images found.</p>
+    {% endfor %}
+</div>
+{% endblock %}
