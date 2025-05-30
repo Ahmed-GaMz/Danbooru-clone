@@ -1,0 +1,89 @@
+from flask import Flask, render_template, request, redirect, url_for, send_from_directory
+from flask_sqlalchemy import SQLAlchemy
+import os
+from datetime import datetime
+import uuid
+
+app = Flask(__name__)
+
+# إعدادات الرفع والمجلدات
+UPLOAD_FOLDER = 'static/uploads'
+os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///danbooru_clone.db'
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
+db = SQLAlchemy(app)
+
+# نموذج قاعدة البيانات للصور
+class Image(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    filename = db.Column(db.String(150), nullable=False)
+    tags = db.Column(db.String(300), nullable=True)
+    upload_date = db.Column(db.DateTime, default=datetime.utcnow)
+
+    def __repr__(self):
+        return f'<Image {self.id} - {self.filename}>'
+
+# الصفحة الرئيسية: عرض الصور مع خيار بحث بالتاغات
+@app.route('/', methods=['GET'])
+def index():
+    search = request.args.get('search')
+    if search:
+        # بحث بالتاغات (تطابق جزئي)
+        images = Image.query.filter(Image.tags.contains(search)).order_by(Image.upload_date.desc()).all()
+    else:
+        images = Image.query.order_by(Image.upload_date.desc()).all()
+    return render_template('index.html', images=images, search=search)
+
+# صفحة رفع الصور
+@app.route('/upload', methods=['GET', 'POST'])
+def upload():
+    if request.method == 'POST':
+        file = request.files.get('file')
+        tags = request.form.get('tags', '')
+
+        if not file:
+            return "No file uploaded", 400
+
+        # تحقق من امتداد الصورة
+        if not allowed_file(file.filename):
+            return "Invalid file type", 400
+
+        # حفظ الصورة مع اسم فريد
+        ext = file.filename.rsplit('.', 1)[1].lower()
+        filename = f"{uuid.uuid4().hex}.{ext}"
+        filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+        file.save(filepath)
+
+        # حفظ بيانات الصورة في DB
+        new_image = Image(filename=filename, tags=tags)
+        db.session.add(new_image)
+        db.session.commit()
+
+        return redirect(url_for('index'))
+
+    return render_template('upload.html')
+
+# صفحة تفاصيل الصورة
+@app.route('/image/<int:image_id>')
+def image_detail(image_id):
+    image = Image.query.get_or_404(image_id)
+    tags = image.tags.split(',') if image.tags else []
+    return render_template('image_detail.html', image=image, tags=tags)
+
+# السماح بامتدادات الصور فقط
+def allowed_file(filename):
+    allowed_extensions = {'png', 'jpg', 'jpeg', 'gif', 'webp'}
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in allowed_extensions
+
+# لعرض الصور من المجلد
+@app.route('/uploads/<filename>')
+def uploaded_file(filename):
+    return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
+
+if __name__ == '__main__':
+    with app.app_context():
+        db.create_all()
+    app.run(debug=True)
