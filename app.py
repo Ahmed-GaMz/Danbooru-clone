@@ -3,6 +3,8 @@ from flask_sqlalchemy import SQLAlchemy
 import os
 from datetime import datetime
 import uuid
+import base64
+import requests
 
 app = Flask(__name__)
 
@@ -26,12 +28,36 @@ class Image(db.Model):
     def __repr__(self):
         return f'<Image {self.id} - {self.filename}>'
 
+# دالة رفع الصور إلى ImageKit
+def upload_to_imagekit(filepath, filename):
+    url = "https://upload.imagekit.io/api/v1/files/upload"
+    with open(filepath, "rb") as f:
+        file_data = f.read()
+
+    private_key = "private_fHM55RpxlyGTdYuoWF3sbPlw1jQ="  # تأكد تحافظ عليه
+    auth_header = base64.b64encode(f"{private_key}:".encode()).decode()
+
+    files = {
+        "file": (filename, file_data),
+        "fileName": (None, filename),
+    }
+
+    headers = {
+        "Authorization": f"Basic {auth_header}"
+    }
+
+    response = requests.post(url, headers=headers, files=files)
+    if response.status_code == 200:
+        return response.json().get("url")
+    else:
+        print("فشل رفع الصورة:", response.text)
+        return None
+
 # الصفحة الرئيسية: عرض الصور مع خيار بحث بالتاغات
 @app.route('/', methods=['GET'])
 def index():
     search = request.args.get('search')
     if search:
-        # بحث بالتاغات (تطابق جزئي)
         images = Image.query.filter(Image.tags.contains(search)).order_by(Image.upload_date.desc()).all()
     else:
         images = Image.query.order_by(Image.upload_date.desc()).all()
@@ -47,18 +73,19 @@ def upload():
         if not file:
             return "No file uploaded", 400
 
-        # تحقق من امتداد الصورة
         if not allowed_file(file.filename):
             return "Invalid file type", 400
 
-        # حفظ الصورة مع اسم فريد
         ext = file.filename.rsplit('.', 1)[1].lower()
         filename = f"{uuid.uuid4().hex}.{ext}"
         filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
         file.save(filepath)
 
-        # حفظ بيانات الصورة في DB
-        new_image = Image(filename=filename, tags=tags)
+        # رفع إلى ImageKit
+        imagekit_url = upload_to_imagekit(filepath, filename)
+
+        # خزن الرابط إذا نجح، أو اسم الملف إذا فشل
+        new_image = Image(filename=imagekit_url or filename, tags=tags)
         db.session.add(new_image)
         db.session.commit()
 
@@ -78,7 +105,7 @@ def allowed_file(filename):
     allowed_extensions = {'png', 'jpg', 'jpeg', 'gif', 'webp'}
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in allowed_extensions
 
-# لعرض الصور من المجلد
+# لعرض الصور من المجلد (فقط إذا الصورة محلية، مو من ImageKit)
 @app.route('/uploads/<filename>')
 def uploaded_file(filename):
     return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
