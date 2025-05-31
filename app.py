@@ -13,7 +13,7 @@ UPLOAD_FOLDER = 'static/uploads'
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///danbooru_clone.db'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///instance/danbooru_clone.db'  # تم التعديل هنا
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
@@ -53,7 +53,7 @@ def upload_to_imagekit(filepath, filename):
         print("فشل رفع الصورة:", response.text)
         return None
 
-# الصفحة الرئيسية: عرض الصور مع خيار بحث بالتاغات
+# الصفحة الرئيسية
 @app.route('/', methods=['GET'])
 def index():
     search = request.args.get('search')
@@ -105,12 +105,12 @@ def allowed_file(filename):
     allowed_extensions = {'png', 'jpg', 'jpeg', 'gif', 'webp'}
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in allowed_extensions
 
-# لعرض الصور من المجلد (فقط إذا الصورة محلية، مو من ImageKit)
+# لعرض الصور من السيرفر المحلي (إذا مو مرفوعة على ImageKit)
 @app.route('/uploads/<filename>')
 def uploaded_file(filename):
     return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
 
 if __name__ == '__main__':
     with app.app_context():
-        db.create_all()  # هذا اللي يبني قاعدة البيانات والجداول
+        db.create_all()
     app.run(debug=True)
