@@ -13,7 +13,10 @@ UPLOAD_FOLDER = 'static/uploads'
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///instance/danbooru_clone.db'  # تم التعديل هنا
+
+# استخدم هنا رابط PostgreSQL من رندر بدل SQLite
+app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://danbooru_db_user:niAnXwCdoulaVIR0fAW8xIfT6RB7zpC1@dpg-d0t5fmk9c44c73954vng-a/danbooru_db'
+
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
@@ -34,7 +37,7 @@ def upload_to_imagekit(filepath, filename):
     with open(filepath, "rb") as f:
         file_data = f.read()
 
-    private_key = "private_fHM55RpxlyGTdYuoWF3sbPlw1jQ="  # تأكد تحافظ عليه
+    private_key = "private_fHM55RpxlyGTdYuoWF3sbPlw1jQ="  # خليك حذر مع المفتاح الخاص!
     auth_header = base64.b64encode(f"{private_key}:".encode()).decode()
 
     files = {
