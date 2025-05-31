@@ -1,16 +1,110 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Danbooru Clone</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f8f8f8;
+        }
+        header {
+            margin-bottom: 20px;
+        }
+        a {
+            text-decoration: none;
+            color: #0366d6;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+        .container {
+            max-width: 900px;
+            margin: auto;
+            background: white;
+            padding: 15px 20px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        .image-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill,minmax(150px,1fr));
+            gap: 10px;
+        }
+        .image-grid img {
+            width: 100%;
+            height: auto;
+            border-radius: 5px;
+            object-fit: cover;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+        }
+        .image-grid img:hover {
+            transform: scale(1.05);
+        }
+        .tag {
+            background-color: #eee;
+            border-radius: 3px;
+            padding: 2px 6px;
+            margin: 0 4px 4px 0;
+            display: inline-block;
+            font-size: 0.9em;
+            color: #555;
+        }
+        form.search-form {
+            margin-bottom: 20px;
+            display: flex;
+            gap: 5px;
+        }
+        form.search-form input[type="text"] {
+            flex-grow: 1;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        form.search-form button {
+            padding: 8px 12px;
+            border: none;
+            background-color: #0366d6;
+            color: white;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        form.search-form button:hover {
+            background-color: #024ea2;
+        }
+        .detail-image {
+            max-width: 100%;
+            border-radius: 8px;
+            margin-bottom: 15px;
+        }
+        footer {
+            margin-top: 40px;
+            text-align: center;
+            color: #999;
+            font-size: 0.9em;
+        }
+        nav a {
+            margin-right: 15px;
+        }
+    </style>
 </head>
 <body>
-    <header>
-        <h1><a href="{{ url_for('index') }}">Danbooru Clone</a></h1>
-    </header>
     <div class="container">
+        <header>
+            <h1><a href="{{ url_for('index') }}">Danbooru Clone</a></h1>
+            <nav>
+                <a href="{{ url_for('index') }}">Home</a>
+                <a href="{{ url_for('upload') }}">Upload</a>
+            </nav>
+        </header>
+
         {% block content %}{% endblock %}
+
+        <footer>
+            &copy; 2025 Danbooru Clone
+        </footer>
     </div>
 </body>
 </html>
