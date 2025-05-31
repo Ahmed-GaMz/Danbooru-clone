@@ -14,9 +14,8 @@ os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
-# استخدم هنا رابط PostgreSQL من رندر بدل SQLite
-app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://danbooru_db_user:niAnXwCdoulaVIR0fAW8xIfT6RB7zpC1@dpg-d0t5fmk9c44c73954vng-a/danbooru_db'
-
+# استخدم هنا رابط PostgreSQL من رندر بدل 
+app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://danbooru_db_user:niAnXwCdoulaVIR0fAW8xIfT6RB7zpC1@dpg-d0t5fmk9c44c73954vng-a:5432/danbooru_db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
