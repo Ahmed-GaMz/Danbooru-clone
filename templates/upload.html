@@ -1,14 +1,15 @@
 {% extends "base.html" %}
 
 {% block content %}
-<h2>Upload New Image</h2>
-<form method="POST" enctype="multipart/form-data" class="upload-form">
-    <label>Select image:</label><br/>
-    <input type="file" name="file" accept="image/*" required><br/><br/>
+<h2>Upload Image</h2>
+<form method="POST" enctype="multipart/form-data" action="{{ url_for('upload') }}">
+    <label for="file">Select image:</label><br>
+    <input type="file" name="file" accept="image/*" required><br><br>
 
-    <label>Tags (comma separated):</label><br/>
-    <input type="text" name="tags" placeholder="cat, nature, sunset"><br/><br/>
+    <label for="tags">Tags (comma-separated):</label><br>
+    <input type="text" name="tags" placeholder="e.g., cat, cute, black" style="width: 100%;"><br><br>
 
     <button type="submit">Upload</button>
 </form>
+<a href="{{ url_for('index') }}">Back to Home</a>
 {% endblock %}
