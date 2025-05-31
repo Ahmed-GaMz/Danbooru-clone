@@ -2,7 +2,7 @@
 
 {% block content %}
 <form method="get" action="{{ url_for('index') }}" class="search-form">
-    <input type="text" name="search" placeholder="Search tags..." value="{{ search or '' }}">
+    <input type="text" name="search" placeholder="Search tags..." value="{{ search or '' }}" autocomplete="off" />
     <button type="submit">Search</button>
 </form>
 
@@ -10,9 +10,9 @@
     {% for image in images %}
         <a href="{{ url_for('image_detail', image_id=image.id) }}">
             {% if image.filename.startswith('http') %}
-                <img src="{{ image.filename }}" alt="Image {{ image.id }}">
+                <img src="{{ image.filename }}" alt="Image {{ image.id }}" loading="lazy" />
             {% else %}
-                <img src="{{ url_for('uploaded_file', filename=image.filename) }}" alt="Image {{ image.id }}">
+                <img src="{{ url_for('uploaded_file', filename=image.filename) }}" alt="Image {{ image.id }}" loading="lazy" />
             {% endif %}
         </a>
     {% else %}
